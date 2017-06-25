@@ -155,8 +155,8 @@ private:
 public:
   AtomicPointer() {}
   explicit AtomicPointer(void *p) : rep_(p) {}
-  inline void *NoBarrier_Load() const { return rep_; }
-  inline void NoBarrier_Store(void *v) { rep_ = v; }
+  inline void *NoBarrier_Load() const { return rep_; } //无屏障操作
+  inline void NoBarrier_Store(void *v) { rep_ = v; }   //
   inline void *Acquire_Load() const
   {
     void *result = rep_;

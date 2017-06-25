@@ -1,0 +1,21 @@
+{
+    "files.associations": {
+        "__bit_reference": "cpp",
+        "__split_buffer": "cpp",
+        "__tree": "cpp",
+        "deque": "cpp",
+        "iterator": "cpp",
+        "map": "cpp",
+        "memory": "cpp",
+        "set": "cpp",
+        "string": "cpp",
+        "vector": "cpp",
+        "__tuple": "cpp",
+        "__config": "cpp",
+        "algorithm": "cpp",
+        "bitset": "cpp",
+        "initializer_list": "cpp",
+        "utility": "cpp",
+        "*.tcc": "cpp"
+    }
+}
