@@ -34,35 +34,41 @@
 #include "leveldb/table_builder.h"
 #include "util/coding.h"
 
-namespace leveldb {
+namespace leveldb
+{
 
-BlockBuilder::BlockBuilder(const Options* options)
+BlockBuilder::BlockBuilder(const Options *options)
     : options_(options),
       restarts_(),
       counter_(0),
-      finished_(false) {
+      finished_(false)
+{
   assert(options->block_restart_interval >= 1);
-  restarts_.push_back(0);       // First restart point is at offset 0
+  restarts_.push_back(0); // First restart point is at offset 0
 }
 
-void BlockBuilder::Reset() {
+void BlockBuilder::Reset()
+{
   buffer_.clear();
   restarts_.clear();
-  restarts_.push_back(0);       // First restart point is at offset 0
+  restarts_.push_back(0); // First restart point is at offset 0
   counter_ = 0;
   finished_ = false;
   last_key_.clear();
 }
 
-size_t BlockBuilder::CurrentSizeEstimate() const {
-  return (buffer_.size() +                        // Raw data buffer
-          restarts_.size() * sizeof(uint32_t) +   // Restart array
-          sizeof(uint32_t));                      // Restart array length
+size_t BlockBuilder::CurrentSizeEstimate() const
+{
+  return (buffer_.size() +                      // Raw data buffer
+          restarts_.size() * sizeof(uint32_t) + // Restart array
+          sizeof(uint32_t));                    // Restart array length
 }
 
-Slice BlockBuilder::Finish() {
+Slice BlockBuilder::Finish()
+{
   // Append restart array
-  for (size_t i = 0; i < restarts_.size(); i++) {
+  for (size_t i = 0; i < restarts_.size(); i++)
+  {
     PutFixed32(&buffer_, restarts_[i]);
   }
   PutFixed32(&buffer_, restarts_.size());
@@ -70,26 +76,40 @@ Slice BlockBuilder::Finish() {
   return Slice(buffer_);
 }
 
-void BlockBuilder::Add(const Slice& key, const Slice& value) {
+void BlockBuilder::Add(const Slice &key, const Slice &value)
+{
   Slice last_key_piece(last_key_);
   assert(!finished_);
   assert(counter_ <= options_->block_restart_interval);
   assert(buffer_.empty() // No values yet?
          || options_->comparator->Compare(key, last_key_piece) > 0);
+
+  //1. 构建Restart Point
   size_t shared = 0;
-  if (counter_ < options_->block_restart_interval) {
+
+  //每block_restart_interval条记录创建一个重启点
+  if (counter_ < options_->block_restart_interval)  //配置参数，默认为16
+  {
+    //尚未达到重启点间隔，沿用当前的重启点
     // See how much sharing to do with previous string
     const size_t min_length = std::min(last_key_piece.size(), key.size());
-    while ((shared < min_length) && (last_key_piece[shared] == key[shared])) {
+    while ((shared < min_length) && (last_key_piece[shared] == key[shared]))
+    {
       shared++;
     }
-  } else {
+  }
+  else
+  {
+    //触发并创建新的重启点
+    //此时，shared = 0; 重启点中将保存完整key
     // Restart compression
-    restarts_.push_back(buffer_.size());
+    restarts_.push_back(buffer_.size());  //buffer_.size()为当前数据块偏移
     counter_ = 0;
   }
   const size_t non_shared = key.size() - shared;
 
+  //2. 记录数据
+  // shared size | no shared size | value size | no shared key data | value data
   // Add "<shared><non_shared><value_size>" to buffer_
   PutVarint32(&buffer_, shared);
   PutVarint32(&buffer_, non_shared);
@@ -106,4 +126,4 @@ void BlockBuilder::Add(const Slice& key, const Slice& value) {
   counter_++;
 }
 
-}  // namespace leveldb
+} // namespace leveldb

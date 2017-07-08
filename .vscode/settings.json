@@ -16,6 +16,10 @@
         "bitset": "cpp",
         "initializer_list": "cpp",
         "utility": "cpp",
-        "*.tcc": "cpp"
+        "*.tcc": "cpp",
+        "__functional_base": "cpp",
+        "__locale": "cpp",
+        "functional": "cpp",
+        "system_error": "cpp"
     }
 }
